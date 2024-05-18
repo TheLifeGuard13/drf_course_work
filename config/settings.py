@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "drf_yasg",
 
     'users',
+    'habbits',
 ]
 
 MIDDLEWARE = [
