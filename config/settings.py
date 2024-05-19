@@ -122,7 +122,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -182,7 +182,8 @@ CELERY_BROKER_URL = 'redis://localhost:6379'  # Например, Redis, кот�
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 
 # Часовой пояс для работы Celery
-CELERY_TIMEZONE = "UTC"
+# CELERY_TIMEZONE = "UTC"
+CELERY_ENABLE_UTC = False
 
 # Флаг отслеживания выполнения задач
 CELERY_TASK_TRACK_STARTED = True
@@ -192,7 +193,7 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 
 CELERY_BEAT_SCHEDULE = {
     'task-name': {
-        'task': 'users.tasks.block_inactive_user',  ## вписать свою
+        'task': 'habbits.tasks.send_telegram_reminder',
         'schedule': timedelta(minutes=1),
     },
 }
@@ -207,3 +208,8 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = False
+
+# работа с API Telegram
+TELEGRAM_TOKEN = os.getenv("BOT_TOKEN")
+TELEGRAM_URL = f'https://api.telegram.org/bot'
+TELEGRAM_CHAT_ID = 821943930
