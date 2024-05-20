@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework.exceptions import ValidationError
 
 from habbits.models import Habit
@@ -27,13 +29,26 @@ class PeriodValidator:
 
 
 class ConnectedHabitValidator:
-    """Валидирует поле - связанная привычка (запрещает связывать полезную привычку с полезной."""
+    """Валидирует поле - связанная привычка (запрещает связывать полезную привычку с полезной)."""
     def __init__(self, field):
         self.field = field
 
     def __call__(self, value) -> None:
-        connected_habit_id = value.get('connected_habit').id
-        connected_habit = Habit.objects.get(id=connected_habit_id)
+        if value["connected_habit"]:
+            connected_habit_id = value.get('connected_habit').id
+            connected_habit = Habit.objects.get(id=connected_habit_id)
 
-        if not connected_habit.is_pleasant:
-            raise ValidationError(f"Нельзя сделать полезную привычку связанной")
+            if not connected_habit.is_pleasant:
+                raise ValidationError(f"Нельзя сделать полезную привычку связанной")
+
+
+class StartHabitValidator:
+    """Валидирует поле - дата старта привычки (с завтрашнего дня)."""
+    def __init__(self, field):
+        self.field = field
+
+    def __call__(self, value) -> None:
+        temp_value = dict(value).get(self.field)
+        now = datetime.now().date()
+        if temp_value <= now:
+            raise ValidationError(f"Давайте лучше с завтрашнего дня!")

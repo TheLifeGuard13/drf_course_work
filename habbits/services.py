@@ -1,10 +1,27 @@
-import requests
+import json
+from datetime import datetime, timedelta
 
-from config.settings import TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_URL
+from django_celery_beat.models import CrontabSchedule, PeriodicTask, IntervalSchedule
 
 
-def telegram_api(message: str) -> None:
-    """
-    Функция отправки сообщения в Телеграм бот
-    """
-    requests.get(f'{TELEGRAM_URL}{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&text={message}')
+def set_schedule_for_reminder(obj):
+    time = datetime.strptime(obj['execution_time'], '%H:%M:%S') - timedelta(minutes=15)
+    message = f"Через 15 минут вам пора >>>{obj["action"]}<<<"
+
+    schedule, _ = CrontabSchedule.objects.get_or_create(
+        minute=int(time.minute),
+        hour=int(time.hour),
+        day_of_week='*',
+        day_of_month='*',
+        month_of_year='*',
+        timezone="Europe/Moscow"
+    )
+
+    PeriodicTask.objects.create(
+        crontab=schedule,
+        name=f'Sending reminder #{int(obj['id'])}',
+        task='habbits.tasks.send_telegram_reminder',
+        args=json.dumps([message]),
+        start_time=datetime.now()
+    )
+

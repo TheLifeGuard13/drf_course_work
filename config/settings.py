@@ -182,8 +182,7 @@ CELERY_BROKER_URL = 'redis://localhost:6379'  # Например, Redis, кот�
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 
 # Часовой пояс для работы Celery
-# CELERY_TIMEZONE = "UTC"
-CELERY_ENABLE_UTC = False
+CELERY_TIMEZONE = "Europe/Moscow"
 
 # Флаг отслеживания выполнения задач
 CELERY_TASK_TRACK_STARTED = True
@@ -191,12 +190,7 @@ CELERY_TASK_TRACK_STARTED = True
 # Максимальное время на выполнение задачи
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
-CELERY_BEAT_SCHEDULE = {
-    'task-name': {
-        'task': 'habbits.tasks.send_telegram_reminder',
-        'schedule': timedelta(minutes=1),
-    },
-}
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",  # Замените на адрес вашего фронтенд-сервера

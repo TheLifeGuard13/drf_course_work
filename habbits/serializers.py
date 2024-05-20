@@ -1,12 +1,12 @@
 from rest_framework import serializers
 
 from habbits.models import Habit
-from habbits.validators import DurationValidator, PeriodValidator, ConnectedHabitValidator
+from habbits.validators import DurationValidator, PeriodValidator, ConnectedHabitValidator, StartHabitValidator
 
 
 class HabitSerializer(serializers.ModelSerializer):
     validators = [DurationValidator(field="execution_duration_seconds"), PeriodValidator(field="periodicity"),
-                  ConnectedHabitValidator(field="connected_habit")]
+                  ConnectedHabitValidator(field="connected_habit"), StartHabitValidator(field="execution_date")]
 
     def validate(self, data):
         if data.get("is_pleasant"):
