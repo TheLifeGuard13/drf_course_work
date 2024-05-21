@@ -1,12 +1,14 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import generics, viewsets
-from rest_framework.response import Response
 
 from habbits.models import Habit
 from habbits.paginators import HabitPaginator
 from habbits.serializers import HabitSerializer
 from habbits.services import set_schedule_for_reminder
-# from habbits.tasks import send_telegram_start_message
+from habbits.tasks import (
+    send_telegram_start_message,
+    send_telegram_start_message_award,
+    send_telegram_start_message_connected_habit,
+)
 from users.permissions import IsOwner, IsStaff
 
 
@@ -16,7 +18,7 @@ class HabitListAPIView(generics.ListAPIView):
     pagination_class = HabitPaginator
 
     def get_queryset(self):
-        return Habit.objects.filter(is_public=True)
+        return Habit.objects.filter(is_shared=True)
 
 
 class HabitViewSet(viewsets.ModelViewSet):
@@ -28,18 +30,15 @@ class HabitViewSet(viewsets.ModelViewSet):
         habit = serializer.save()
         habit.owner = self.request.user
         habit.save()
-        # send_telegram_start_message.delay(serializer.data)
-        set_schedule_for_reminder(serializer.data)
-
-    def partial_update(self, request, *args, **kwargs):
-        habit = get_object_or_404(self.queryset, pk=kwargs.get('pk'))
-        serializer = self.serializer_class(habit, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        # send_telegram_start_message.delay(serializer.data)
-        return Response(serializer.data)
+        if habit.award:
+            send_telegram_start_message_award.delay(serializer.data)  # отправляет сообщение сразу
+        elif habit.connected_habit:
+            send_telegram_start_message_connected_habit.delay(serializer.data)  # отправляет сообщение сразу
+        else:
+            send_telegram_start_message.delay(serializer.data)  # отправляет сообщение сразу
+        set_schedule_for_reminder(serializer.data)  # запускает планировщика
 
     def get_permissions(self):
         if self.action in ["list", "create", "update", "retrieve", "destroy"]:
-            self.permission_classes = (IsOwner | IsStaff, )
+            self.permission_classes = (IsOwner | IsStaff,)
         return super().get_permissions()
