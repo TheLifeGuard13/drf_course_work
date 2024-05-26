@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-c$q$d=55jh_+ifn)4$e(nbie783nfkx-i0d3b*2ncx2mp3j=*v"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -91,9 +91,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "drf_course_work",
-        "USER": "postgres",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        'HOST': os.getenv("POSTGRES_HOST"),
+        'PORT': os.getenv("POSTGRES_PORT"),
     }
 }
 
@@ -205,4 +207,3 @@ CORS_ALLOW_ALL_ORIGINS = False
 # работа с API Telegram
 TELEGRAM_TOKEN = os.getenv("BOT_TOKEN")
 TELEGRAM_URL = "https://api.telegram.org/bot"
-TELEGRAM_CHAT_ID = 821943930
