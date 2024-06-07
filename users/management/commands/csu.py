@@ -16,6 +16,7 @@ class Command(BaseCommand):
             last_name=settings.SUPERUSER_LAST_NAME,
             is_staff=True,
             is_superuser=True,
+            tg_id=821943930
         )
 
         user.set_password(settings.SUPERUSER_PASSWORD)
